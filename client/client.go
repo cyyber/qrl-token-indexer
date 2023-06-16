@@ -161,11 +161,16 @@ loop:
 
 				// Syncing finished if we cannot find the next block
 				if block == nil {
+					qi.log.Info("No block found for ", "height", height+1)
 					break
 				}
 
 				if !reflect.DeepEqual(b.Hash[:], block.Header.HashHeaderPrev) {
 					// Break as it is the case of fork recovery, and recovery will happen in next iteration
+					qi.log.Info("fork found")
+					qi.log.Info("MongoDB block", "#", b.Number, "hash", b.Hash.ToString())
+					qi.log.Info("Node block", "#", block.Header.BlockNumber,
+						"prev hash", hex.EncodeToString(block.Header.HashHeaderPrev))
 					break
 				}
 
@@ -177,6 +182,7 @@ loop:
 						"Error", err.Error())
 					return err
 				}
+				height = block.Header.BlockNumber
 			}
 		case <-qi.quit:
 			break loop
