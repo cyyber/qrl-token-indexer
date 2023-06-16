@@ -15,7 +15,8 @@ func (t TokenHolders) Apply(tx *TransferTokenTx) error {
 		return fmt.Errorf("from address: %s not found for TokenHolder", from.ToString())
 	}
 
-	for address, amount := range tx.AddressAmount {
+	for i, address := range tx.Addresses {
+		amount := tx.Amounts[i]
 		if uint64(fromTokenHolder.Amount) < uint64(amount) {
 			return fmt.Errorf("from address: %s "+
 				"txhash: %s "+
@@ -50,7 +51,8 @@ func (t TokenHolders) Revert(tx *TransferTokenTx) error {
 			hex.EncodeToString(from[:]))
 	}
 
-	for address, amount := range tx.AddressAmount {
+	for i, address := range tx.Addresses {
+		amount := tx.Amounts[i]
 		tokenHolder, ok := t[address]
 		if !ok {
 			return fmt.Errorf("address: %s "+

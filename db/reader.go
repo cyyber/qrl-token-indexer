@@ -112,7 +112,7 @@ func (m *MongoDBProcessor) GetTokenHolders(transferTokenTx *models.TransferToken
 	}
 	tokenHolders[transferTokenTx.From] = fromTokenHolder
 
-	for address, _ := range transferTokenTx.AddressAmount {
+	for _, address := range transferTokenTx.Addresses {
 		tokenHolder, err := m.GetTokenHolder(transferTokenTx.TokenTxHash, address)
 		if err != nil {
 			if err != mongo.ErrNoDocuments {
@@ -143,7 +143,7 @@ func (m *MongoDBProcessor) GetTokenHoldersWithCache(transferTokenTx *models.Tran
 
 	tokenHolders[transferTokenTx.From] = fromTokenHolder
 
-	for address, _ := range transferTokenTx.AddressAmount {
+	for _, address := range transferTokenTx.Addresses {
 		tokenHolder := cache.Get(transferTokenTx.TokenTxHash, address)
 		if tokenHolder == nil {
 			tokenHolder, err = m.GetTokenHolder(transferTokenTx.TokenTxHash, address)
