@@ -31,6 +31,7 @@ func NewTransferTokenTxFromPBData(blockNumber uint64, pbData *generated.Transact
 	} else {
 		t.From = xmss.GetXMSSAddressFromPK(pbData.PublicKey)
 	}
+	t.AddressAmount = make(map[common.Address]int64)
 
 	for i, addrTo := range tt.AddrsTo {
 		sizedAddrTo := misc.ToSizedAddress(addrTo)

@@ -29,6 +29,9 @@ func NewTokenTxFromPBData(blockNumber uint64, pbData *generated.Transaction) *To
 	t := &TokenTx{}
 	t.BlockNumber = int64(blockNumber)
 	t.TxHash = misc.ToSizedHash(pbData.TransactionHash)
+	t.Name = tt.Name
+	t.Decimals = int64(tt.Decimals)
+	t.InitialBalances = make(map[common.Address]int64)
 
 	for _, addressAmount := range tt.InitialBalances {
 		sizedAddrTo := misc.ToSizedAddress(addressAmount.Address)
