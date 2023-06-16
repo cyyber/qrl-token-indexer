@@ -107,26 +107,36 @@ func (m *MongoDBProcessor) ProcessBlock(b *generated.Block) error {
 		}
 
 		if _, err := m.blocksCollection.BulkWrite(sctx, blockOperations); err != nil {
+			m.log.Error("Failed to write in blocksCollection",
+				"total operations", len(blockOperations))
 			return err
 		}
 
 		if len(tokenTxOperations) > 0 {
 			if _, err := m.tokenTxsCollection.BulkWrite(sctx, tokenTxOperations); err != nil {
+				m.log.Error("Failed to write in tokenTxsCollection",
+					"total operations", len(tokenTxOperations))
 				return err
 			}
 		}
 		if len(transferTokenTxOperations) > 0 {
 			if _, err := m.transferTokenTxsCollection.BulkWrite(sctx, transferTokenTxOperations); err != nil {
+				m.log.Error("Failed to write in transferTokenTxsCollection",
+					"total operations", len(transferTokenTxOperations))
 				return err
 			}
 		}
 		if len(tokenHolderOperations) > 0 {
 			if _, err := m.tokenHoldersCollection.BulkWrite(sctx, tokenHolderOperations); err != nil {
+				m.log.Error("Failed to write in tokenHoldersCollection",
+					"total operations", len(tokenHolderOperations))
 				return err
 			}
 		}
 		if len(tokenRelatedTxOperations) > 0 {
 			if _, err := m.tokenRelatedTxsCollection.BulkWrite(sctx, tokenRelatedTxOperations); err != nil {
+				m.log.Error("Failed to write in tokenRelatedTxsCollection",
+					"total operations", len(tokenRelatedTxOperations))
 				return err
 			}
 		}
@@ -267,26 +277,36 @@ func (m *MongoDBProcessor) RevertLastBlock() error {
 		}
 
 		if _, err := m.blocksCollection.BulkWrite(sctx, blockOperations); err != nil {
+			m.log.Error("Failed to write in blocksCollection",
+				"total operations", len(blockOperations))
 			return err
 		}
 
 		if len(tokenTxOperations) > 0 {
 			if _, err := m.tokenTxsCollection.BulkWrite(sctx, tokenTxOperations); err != nil {
+				m.log.Error("Failed to write in tokenTxsCollection",
+					"total operations", len(tokenTxOperations))
 				return err
 			}
 		}
 		if len(transferTokenTxOperations) > 0 {
 			if _, err := m.transferTokenTxsCollection.BulkWrite(sctx, transferTokenTxOperations); err != nil {
+				m.log.Error("Failed to write in transferTokenTxsCollection",
+					"total operations", len(transferTokenTxOperations))
 				return err
 			}
 		}
 		if len(tokenHolderOperations) > 0 {
 			if _, err := m.tokenHoldersCollection.BulkWrite(sctx, tokenHolderOperations); err != nil {
+				m.log.Error("Failed to write in tokenHoldersCollection",
+					"total operations", len(tokenHolderOperations))
 				return err
 			}
 		}
 		if len(tokenRelatedTxOperations) > 0 {
 			if _, err := m.tokenRelatedTxsCollection.BulkWrite(sctx, tokenRelatedTxOperations); err != nil {
+				m.log.Error("Failed to write in tokenRelatedTxsCollection",
+					"total operations", len(tokenRelatedTxOperations))
 				return err
 			}
 		}
