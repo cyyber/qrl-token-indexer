@@ -2,6 +2,9 @@ package db
 
 import (
 	"encoding/hex"
+	"github.com/cyyber/qrl-token-indexer/common"
+	"github.com/cyyber/qrl-token-indexer/config"
+
 	"github.com/cyyber/qrl-token-indexer/db/models"
 	"github.com/cyyber/qrl-token-indexer/generated"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -30,6 +33,16 @@ func (m *MongoDBProcessor) ProcessBlock(b *generated.Block) error {
 
 	blockModel := models.NewBlockFromPBData(b)
 	AddInsertOneModelIntoOperations(blockOperations, blockModel)
+
+	reOrgLimit := common.BLOCKZERO + config.GetConfig().ReOrgLimit
+	if uint64(blockModel.Number) > reOrgLimit {
+		removeBlockNumber := uint64(blockModel.Number) - reOrgLimit
+		deleteOneOperation := mongo.NewDeleteOneModel()
+		deleteOneOperation.SetFilter(bsonx.Doc{
+			{"number", bsonx.Int64(int64(removeBlockNumber))},
+		})
+		blockOperations = append(blockOperations, deleteOneOperation)
+	}
 
 	tokenHoldersCache := make(models.TokenHoldersCache)
 
@@ -96,17 +109,26 @@ func (m *MongoDBProcessor) ProcessBlock(b *generated.Block) error {
 		if _, err := m.blocksCollection.BulkWrite(sctx, blockOperations); err != nil {
 			return err
 		}
-		if _, err := m.tokenTxsCollection.BulkWrite(sctx, tokenTxOperations); err != nil {
-			return err
+
+		if len(tokenTxOperations) > 0 {
+			if _, err := m.tokenTxsCollection.BulkWrite(sctx, tokenTxOperations); err != nil {
+				return err
+			}
 		}
-		if _, err := m.transferTokenTxsCollection.BulkWrite(sctx, tokenTxOperations); err != nil {
-			return err
+		if len(transferTokenTxOperations) > 0 {
+			if _, err := m.transferTokenTxsCollection.BulkWrite(sctx, transferTokenTxOperations); err != nil {
+				return err
+			}
 		}
-		if _, err := m.tokenHoldersCollection.BulkWrite(sctx, tokenTxOperations); err != nil {
-			return err
+		if len(tokenHolderOperations) > 0 {
+			if _, err := m.tokenHoldersCollection.BulkWrite(sctx, tokenHolderOperations); err != nil {
+				return err
+			}
 		}
-		if _, err := m.tokenRelatedTxsCollection.BulkWrite(sctx, tokenRelatedTxOperations); err != nil {
-			return err
+		if len(tokenRelatedTxOperations) > 0 {
+			if _, err := m.tokenRelatedTxsCollection.BulkWrite(sctx, tokenRelatedTxOperations); err != nil {
+				return err
+			}
 		}
 
 		return sctx.CommitTransaction(sctx)
@@ -247,17 +269,26 @@ func (m *MongoDBProcessor) RevertLastBlock() error {
 		if _, err := m.blocksCollection.BulkWrite(sctx, blockOperations); err != nil {
 			return err
 		}
-		if _, err := m.tokenTxsCollection.BulkWrite(sctx, tokenTxOperations); err != nil {
-			return err
+
+		if len(tokenTxOperations) > 0 {
+			if _, err := m.tokenTxsCollection.BulkWrite(sctx, tokenTxOperations); err != nil {
+				return err
+			}
 		}
-		if _, err := m.transferTokenTxsCollection.BulkWrite(sctx, tokenTxOperations); err != nil {
-			return err
+		if len(transferTokenTxOperations) > 0 {
+			if _, err := m.transferTokenTxsCollection.BulkWrite(sctx, transferTokenTxOperations); err != nil {
+				return err
+			}
 		}
-		if _, err := m.tokenHoldersCollection.BulkWrite(sctx, tokenTxOperations); err != nil {
-			return err
+		if len(tokenHolderOperations) > 0 {
+			if _, err := m.tokenHoldersCollection.BulkWrite(sctx, tokenHolderOperations); err != nil {
+				return err
+			}
 		}
-		if _, err := m.tokenRelatedTxsCollection.BulkWrite(sctx, tokenRelatedTxOperations); err != nil {
-			return err
+		if len(tokenRelatedTxOperations) > 0 {
+			if _, err := m.tokenRelatedTxsCollection.BulkWrite(sctx, tokenRelatedTxOperations); err != nil {
+				return err
+			}
 		}
 
 		return sctx.CommitTransaction(sctx)
