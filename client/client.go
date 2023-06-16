@@ -90,13 +90,6 @@ func (qi *QRLIndexer) run() (err error) {
 	qi.wg.Add(1)
 	defer qi.wg.Done()
 loop:
-	/*
-		TODO:
-		1. Compare block at state is equal to the block in the chain
-		2. If yes, compare block header hashes
-			- If equal, then look for next block and keep processing
-			- If not equal, then find the block number where it matches
-	*/
 	for {
 		select {
 		case <-time.After(10 * time.Second):
@@ -141,7 +134,7 @@ loop:
 				return err
 			}
 
-			if block == nil || !reflect.DeepEqual(block.Header.HashHeader, b.Hash) {
+			if block == nil || !reflect.DeepEqual(block.Header.HashHeader, b.Hash[:]) {
 				err = qi.Rollback(b)
 				if err != nil {
 					qi.log.Error("[run] Failed to Rollback",
@@ -171,7 +164,7 @@ loop:
 					break
 				}
 
-				if !reflect.DeepEqual(b.Hash, block.Header.HashHeaderPrev) {
+				if !reflect.DeepEqual(b.Hash[:], block.Header.HashHeaderPrev) {
 					// Break as it is the case of fork recovery, and recovery will happen in next iteration
 					break
 				}
@@ -247,7 +240,7 @@ func (qi *QRLIndexer) Rollback(b *models.Block) error {
 			return err
 		}
 
-		if reflect.DeepEqual(block.Header.HashHeader, b.Hash) {
+		if reflect.DeepEqual(block.Header.HashHeader, b.Hash[:]) {
 			return nil
 		}
 	}
