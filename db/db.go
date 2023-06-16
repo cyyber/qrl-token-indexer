@@ -86,11 +86,11 @@ func (m *MongoDBProcessor) CreateBlocksIndexes(found bool) error {
 }
 
 func (m *MongoDBProcessor) CreateTokenTxsIndexes(found bool) error {
-	m.blocksCollection = m.database.Collection("tokenTxs")
+	m.tokenTxsCollection = m.database.Collection("tokenTxs")
 	if found {
 		return nil
 	}
-	_, err := m.blocksCollection.Indexes().CreateMany(context.Background(),
+	_, err := m.tokenTxsCollection.Indexes().CreateMany(context.Background(),
 		[]mongo.IndexModel{
 			{Keys: bson.M{"blockNumber": int32(-1)}},
 			{Keys: bson.M{"txHash": int32(-1)}},
@@ -104,11 +104,11 @@ func (m *MongoDBProcessor) CreateTokenTxsIndexes(found bool) error {
 }
 
 func (m *MongoDBProcessor) CreateTransferTokenTxsIndexes(found bool) error {
-	m.blocksCollection = m.database.Collection("transferTokenTxs")
+	m.transferTokenTxsCollection = m.database.Collection("transferTokenTxs")
 	if found {
 		return nil
 	}
-	_, err := m.blocksCollection.Indexes().CreateMany(context.Background(),
+	_, err := m.transferTokenTxsCollection.Indexes().CreateMany(context.Background(),
 		[]mongo.IndexModel{
 			{Keys: bson.M{"blockNumber": int32(-1)}},
 			{Keys: bson.M{"txHash": int32(-1)}},
@@ -125,11 +125,11 @@ func (m *MongoDBProcessor) CreateTransferTokenTxsIndexes(found bool) error {
 }
 
 func (m *MongoDBProcessor) CreateTokenHoldersIndexes(found bool) error {
-	m.blocksCollection = m.database.Collection("tokenHolders")
+	m.tokenHoldersCollection = m.database.Collection("tokenHolders")
 	if found {
 		return nil
 	}
-	_, err := m.blocksCollection.Indexes().CreateMany(context.Background(),
+	_, err := m.tokenHoldersCollection.Indexes().CreateMany(context.Background(),
 		[]mongo.IndexModel{
 			// tokenTxHash is the tx hash that created the token which act as the unique identifier for that token
 			{Keys: bson.M{"tokenTxHash": int32(-1)}},
@@ -144,11 +144,11 @@ func (m *MongoDBProcessor) CreateTokenHoldersIndexes(found bool) error {
 }
 
 func (m *MongoDBProcessor) CreateTokenRelatedTxsIndexes(found bool) error {
-	m.blocksCollection = m.database.Collection("tokenRelatedTxs")
+	m.tokenRelatedTxsCollection = m.database.Collection("tokenRelatedTxs")
 	if found {
 		return nil
 	}
-	_, err := m.blocksCollection.Indexes().CreateMany(context.Background(),
+	_, err := m.tokenRelatedTxsCollection.Indexes().CreateMany(context.Background(),
 		[]mongo.IndexModel{
 			// tokenTxHash is the tx hash that created the token which act as the unique identifier for that token
 			{Keys: bson.M{"tokenTxHash": int32(-1)}},
