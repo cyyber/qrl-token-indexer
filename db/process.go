@@ -2,9 +2,9 @@ package db
 
 import (
 	"encoding/hex"
+
 	"github.com/cyyber/qrl-token-indexer/common"
 	"github.com/cyyber/qrl-token-indexer/config"
-
 	"github.com/cyyber/qrl-token-indexer/db/models"
 	"github.com/cyyber/qrl-token-indexer/generated"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -12,16 +12,16 @@ import (
 	"go.mongodb.org/mongo-driver/x/bsonx"
 )
 
-func AddInsertOneModelIntoOperations(operations []mongo.WriteModel, model interface{}) {
+func AddInsertOneModelIntoOperations(operations *[]mongo.WriteModel, model interface{}) {
 	operation := mongo.NewInsertOneModel()
 	operation.SetDocument(model)
-	operations = append(operations, operation)
+	*operations = append(*operations, operation)
 }
 
-func AddDeleteOneModelIntoOperations(operations []mongo.WriteModel, model interface{}) {
+func AddDeleteOneModelIntoOperations(operations *[]mongo.WriteModel, model interface{}) {
 	operation := mongo.NewDeleteOneModel()
 	operation.SetFilter(model)
-	operations = append(operations, operation)
+	*operations = append(*operations, operation)
 }
 
 func (m *MongoDBProcessor) ProcessBlock(b *generated.Block) error {
@@ -32,7 +32,7 @@ func (m *MongoDBProcessor) ProcessBlock(b *generated.Block) error {
 	var tokenRelatedTxOperations []mongo.WriteModel
 
 	blockModel := models.NewBlockFromPBData(b)
-	AddInsertOneModelIntoOperations(blockOperations, blockModel)
+	AddInsertOneModelIntoOperations(&blockOperations, blockModel)
 
 	reOrgLimit := common.BLOCKZERO + config.GetConfig().ReOrgLimit
 	if uint64(blockModel.Number) > reOrgLimit {
@@ -50,17 +50,17 @@ func (m *MongoDBProcessor) ProcessBlock(b *generated.Block) error {
 		switch protoTX.TransactionType.(type) {
 		case *generated.Transaction_Token_:
 			tokenTx := models.NewTokenTxFromPBData(b.Header.BlockNumber, protoTX)
-			AddInsertOneModelIntoOperations(tokenTxOperations, tokenTx)
+			AddInsertOneModelIntoOperations(&tokenTxOperations, tokenTx)
 
 			tokenHolders := tokenTx.GetTokenHolders()
 			tokenHoldersCache.PutFromTokenHolders(tokenHolders)
 
-			AddInsertOneModelIntoOperations(tokenHolderOperations, tokenHolders)
+			AddInsertOneModelIntoOperations(&tokenHolderOperations, tokenHolders)
 		case *generated.Transaction_TransferToken_:
 			transferTokenTx := models.NewTransferTokenTxFromPBData(b.Header.BlockNumber, protoTX)
-			AddInsertOneModelIntoOperations(transferTokenTxOperations, transferTokenTxOperations)
+			AddInsertOneModelIntoOperations(&transferTokenTxOperations, transferTokenTxOperations)
 
-			AddInsertOneModelIntoOperations(tokenRelatedTxOperations, transferTokenTx.GetTokenRelatedTx())
+			AddInsertOneModelIntoOperations(&tokenRelatedTxOperations, transferTokenTx.GetTokenRelatedTx())
 
 			tokenHolders, err := m.GetTokenHoldersWithCache(transferTokenTx, tokenHoldersCache)
 			if err != nil {
@@ -262,7 +262,7 @@ func (m *MongoDBProcessor) RevertLastBlock() error {
 		tokenTxOperations = append(tokenTxOperations, deleteOperation)
 	}
 
-	AddDeleteOneModelIntoOperations(blockOperations, b)
+	AddDeleteOneModelIntoOperations(&blockOperations, b)
 
 	session, err := m.client.StartSession(options.Session())
 	if err != nil {
