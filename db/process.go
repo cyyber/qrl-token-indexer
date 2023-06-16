@@ -60,7 +60,7 @@ func (m *MongoDBProcessor) ProcessBlock(b *generated.Block) error {
 			}
 		case *generated.Transaction_TransferToken_:
 			transferTokenTx := models.NewTransferTokenTxFromPBData(b.Header.BlockNumber, protoTX)
-			AddInsertOneModelIntoOperations(&transferTokenTxOperations, transferTokenTxOperations)
+			AddInsertOneModelIntoOperations(&transferTokenTxOperations, transferTokenTx)
 
 			AddInsertOneModelIntoOperations(&tokenRelatedTxOperations, transferTokenTx.GetTokenRelatedTx())
 
