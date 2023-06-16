@@ -55,7 +55,9 @@ func (m *MongoDBProcessor) ProcessBlock(b *generated.Block) error {
 			tokenHolders := tokenTx.GetTokenHolders()
 			tokenHoldersCache.PutFromTokenHolders(tokenHolders)
 
-			AddInsertOneModelIntoOperations(&tokenHolderOperations, tokenHolders)
+			for _, tokenHolder := range tokenHolders {
+				AddInsertOneModelIntoOperations(&tokenHolderOperations, tokenHolder)
+			}
 		case *generated.Transaction_TransferToken_:
 			transferTokenTx := models.NewTransferTokenTxFromPBData(b.Header.BlockNumber, protoTX)
 			AddInsertOneModelIntoOperations(&transferTokenTxOperations, transferTokenTxOperations)
