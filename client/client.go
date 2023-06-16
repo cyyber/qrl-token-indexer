@@ -74,7 +74,7 @@ func (qi *QRLIndexer) close() {
 	qi.lock.Lock()
 	defer qi.lock.Unlock()
 
-	qi.quit <- struct{}{}
+	close(qi.quit)
 
 	qi.conn.Close()
 }
