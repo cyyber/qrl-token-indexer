@@ -7,17 +7,18 @@ import (
 )
 
 type TokenTx struct {
-	BlockNumber     int64                    `json:"blockNumber" bson:"blockNumber"`
-	TxHash          common.Hash              `json:"txHash" bson:"txHash"`
-	Name            []byte                   `json:"name" bson:"name"`
-	Decimals        int64                    `json:"decimals" bson:"decimals"`
-	InitialBalances map[common.Address]int64 `json:"initialBalances" bson:"initialBalances"`
+	BlockNumber int64            `json:"blockNumber" bson:"blockNumber"`
+	TxHash      common.Hash      `json:"txHash" bson:"txHash"`
+	Name        []byte           `json:"name" bson:"name"`
+	Decimals    int64            `json:"decimals" bson:"decimals"`
+	Addresses   []common.Address `json:"addresses" bson:"addresses"`
+	Amounts     []int64          `json:"amounts" bson:"amounts"`
 }
 
 func (t *TokenTx) GetTokenHolders() TokenHolders {
 	tokenHolders := make(TokenHolders)
-	for address, balance := range t.InitialBalances {
-		tokenHolder := NewTokenHolder(t.TxHash, address, balance)
+	for i, address := range t.Addresses {
+		tokenHolder := NewTokenHolder(t.TxHash, address, t.Amounts[i])
 		tokenHolders[address] = tokenHolder
 	}
 	return tokenHolders
@@ -31,11 +32,14 @@ func NewTokenTxFromPBData(blockNumber uint64, pbData *generated.Transaction) *To
 	t.TxHash = misc.ToSizedHash(pbData.TransactionHash)
 	t.Name = tt.Name
 	t.Decimals = int64(tt.Decimals)
-	t.InitialBalances = make(map[common.Address]int64)
+
+	t.Addresses = make([]common.Address, 0, len(tt.InitialBalances))
+	t.Amounts = make([]int64, 0, len(tt.InitialBalances))
 
 	for _, addressAmount := range tt.InitialBalances {
 		sizedAddrTo := misc.ToSizedAddress(addressAmount.Address)
-		t.InitialBalances[sizedAddrTo] += int64(addressAmount.Amount)
+		t.Addresses = append(t.Addresses, sizedAddrTo)
+		t.Amounts = append(t.Amounts, int64(addressAmount.Amount))
 	}
 
 	return t

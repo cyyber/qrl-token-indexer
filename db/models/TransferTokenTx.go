@@ -8,11 +8,12 @@ import (
 )
 
 type TransferTokenTx struct {
-	BlockNumber   int64                    `json:"blockNumber" bson:"blockNumber"`
-	TxHash        common.Hash              `json:"txHash" bson:"txHash"`
-	TokenTxHash   common.Hash              `json:"tokenTxHash" bson:"tokenTxHash"`
-	From          common.Address           `json:"from" bson:"from"`
-	AddressAmount map[common.Address]int64 `json:"addressAmount" bson:"addressAmount"`
+	BlockNumber int64            `json:"blockNumber" bson:"blockNumber"`
+	TxHash      common.Hash      `json:"txHash" bson:"txHash"`
+	TokenTxHash common.Hash      `json:"tokenTxHash" bson:"tokenTxHash"`
+	From        common.Address   `json:"from" bson:"from"`
+	Addresses   []common.Address `json:"addresses" bson:"addresses"`
+	Amounts     []int64          `json:"amounts" bson:"amounts"`
 }
 
 func (t *TransferTokenTx) GetTokenRelatedTx() *TokenRelatedTx {
@@ -31,11 +32,13 @@ func NewTransferTokenTxFromPBData(blockNumber uint64, pbData *generated.Transact
 	} else {
 		t.From = xmss.GetXMSSAddressFromPK(pbData.PublicKey)
 	}
-	t.AddressAmount = make(map[common.Address]int64)
+	t.Addresses = make([]common.Address, 0, len(tt.AddrsTo))
+	t.Amounts = make([]int64, 0, len(tt.Amounts))
 
 	for i, addrTo := range tt.AddrsTo {
 		sizedAddrTo := misc.ToSizedAddress(addrTo)
-		t.AddressAmount[sizedAddrTo] += int64(tt.Amounts[i])
+		t.Addresses = append(t.Addresses, sizedAddrTo)
+		t.Amounts = append(t.Amounts, int64(tt.Amounts[i]))
 	}
 
 	return t
