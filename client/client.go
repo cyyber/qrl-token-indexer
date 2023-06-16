@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"reflect"
@@ -112,7 +113,9 @@ loop:
 				}
 				err = qi.m.ProcessBlock(block)
 				if err != nil {
-					qi.log.Error("[run] Failed to ProcessBlock",
+					qi.log.Error("[run] Failed to ProcessBlock (genesis)",
+						"#", block.Header.BlockNumber,
+						"Hash", hex.EncodeToString(block.Header.HashHeader),
 						"Error", err.Error())
 					return err
 				}
@@ -158,7 +161,7 @@ loop:
 				block, err = qi.requestForBlockByNumber(height + 1)
 				if err != nil {
 					qi.log.Error("[run] Error requestForBlockByNumber while syncing",
-						"Blocknumber", height,
+						"#", height,
 						"Error", err.Error())
 					return err
 				}
@@ -176,6 +179,8 @@ loop:
 				err = qi.m.ProcessBlock(block)
 				if err != nil {
 					qi.log.Error("[run] Failed to ProcessBlock",
+						"#", block.Header.BlockNumber,
+						"Hash", hex.EncodeToString(block.Header.HashHeader),
 						"Error", err.Error())
 					return err
 				}
