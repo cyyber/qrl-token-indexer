@@ -2,6 +2,7 @@ package db
 
 import (
 	"encoding/hex"
+	"go.mongodb.org/mongo-driver/bson"
 
 	"github.com/cyyber/qrl-token-indexer/common"
 	"github.com/cyyber/qrl-token-indexer/config"
@@ -87,7 +88,7 @@ func (m *MongoDBProcessor) ProcessBlock(b *generated.Block) error {
 					{"tokenTxHash", bsonx.Binary(0, tokenHolder.TokenTxHash[:])},
 					{"address", bsonx.Binary(0, tokenHolder.Address[:])},
 				})
-				operation.SetUpdate(tokenHolder)
+				operation.SetUpdate(bson.M{"$set": tokenHolder})
 				tokenHolderOperations = append(tokenHolderOperations, operation)
 			}
 
@@ -225,7 +226,7 @@ func (m *MongoDBProcessor) RevertLastBlock() error {
 					{"tokenTxHash", bsonx.Binary(0, tokenHolder.TokenTxHash[:])},
 					{"address", bsonx.Binary(0, tokenHolder.Address[:])},
 				})
-				operation.SetUpdate(tokenHolder)
+				operation.SetUpdate(bson.M{"$set": tokenHolder})
 				tokenHolderOperations = append(tokenHolderOperations, operation)
 			}
 		}
