@@ -195,6 +195,7 @@ func (qi *QRLIndexer) GetAddrFromTx(tx *generated.Transaction) []byte {
 }
 
 func (qi *QRLIndexer) requestForBlockByNumber(blockNumber uint64) (*generated.Block, error) {
+	qi.log.Info("Request block ", "#", blockNumber)
 	resp, err := qi.pac.GetBlockByNumber(context.Background(),
 		&generated.GetBlockByNumberReq{BlockNumber: blockNumber})
 
@@ -217,6 +218,9 @@ func (qi *QRLIndexer) requestForBlockHeight() (uint64, error) {
 }
 
 func (qi *QRLIndexer) Rollback(b *models.Block) error {
+	qi.log.Info("Rollback triggered due to block",
+		"#", b.Number,
+		"hash", b.Hash.ToString())
 
 	for b.Number != common.BLOCKZERO {
 		err := qi.m.RevertLastBlock()
@@ -241,9 +245,10 @@ func (qi *QRLIndexer) Rollback(b *models.Block) error {
 		}
 
 		if reflect.DeepEqual(block.Header.HashHeader, b.Hash[:]) {
-			return nil
+			break
 		}
 	}
 
+	qi.log.Info("Rollback finished")
 	return nil
 }
