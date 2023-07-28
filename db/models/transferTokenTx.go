@@ -28,7 +28,7 @@ func NewTransferTokenTxFromPBData(blockNumber uint64, pbData *generated.Transact
 	t.TokenTxHash = misc.ToSizedHash(tt.TokenTxhash)
 	t.TxHash = misc.ToSizedHash(pbData.TransactionHash)
 	if pbData.MasterAddr != nil {
-		t.From = xmss.GetXMSSAddressFromPK(pbData.MasterAddr)
+		t.From = misc.ToSizedAddress(pbData.MasterAddr)
 	} else {
 		t.From = xmss.GetXMSSAddressFromPK(pbData.PublicKey)
 	}
